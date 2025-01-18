@@ -1,0 +1,153 @@
+hay varias formas de encontrar dispositivos en la misma red
+la forma mas sencilla es replicar lo que haría un dispositivo normal para descubrir otro dispositivo enla misma red.
+
+por ejemplo si tenemos una red con dispositivos a b c d
+todos están en la misma red conectados a traves de un Router 
+
+Podemos ver que cada dispositivo tiene una dirección IP y una dirección mac.
+
+Y supongamos que el dispositivo A necesita comunicarse con el dispositivo C.
+
+Ahora también vamos a suponer que el dispositivo A conoce la IP del dispositivo C, pero como sabemos hasta ahora, para que estos dispositivos se comuniquen dentro de la misma red,
+A--> necesita conocer la dirección MAC del dispositivo C porque como dijimos antes, 
+la comunicación dentro de la red se realiza utilizando la dirección Mac y NO utilizando la dirección IP.
+
+Así que esta es una situación perfectamente normal en la que tenemos un cliente que necesita saber la dirección
+Mac de otro cliente para poder comunicarse con este cliente.
+
+Ahora, lo que el dispositivo A haría es usar un protocolo llamado ARP.
+
+ARP son las siglas de Address Resolution Protocol (protocolo de resolución de direcciones).
+
+Y es un protocolo muy sencillo que nos permite vincular direcciones IP a direcciones MAC.
+
+Así que el objetivo de este protocolo es ayudar en la situación donde 
+un cliente necesita comunicarse con otro cliente.
+Donde solo Conoce la IP del otro cliente, pero no la dirección MAC del otro cliente.
+
+Por lo que hace este cliente es usar el protocolo ARP para identificar dicha dirección.
+
+Como lo hace?
+Básicamente envía un mensaje de difusión, o sea , envía una solicitud ARP a una dirección MAC específica que SI conoce en toda la red, y a esta se conoce como la dirección Broadcast Mac.
+
+------
+
+
+Cuando se configura un paquete para que se envíe a la dirección Mac de difusión, todos los clientes de la misma red recibirán este paquete.
+
+Entonces, ¿el dispositivo A enviará la difusión a todos los clientes de la red diciendo 
+¿quién tiene la dirección 10.0.2.6?
+
+Este paquete va a ser dirigido a la dirección Mac Broadcast y por lo tanto todos los clientes de la red recibirán este paquete, este es un ejemplo de un ARP REQUEST!
+
+Ahora todos estos dispositivos ignorarán este paquete excepto el que tiene esta dirección IP,
+que es ten 10.0.2.6, que es el dispositivo C.
+
+Así que el siguiente paso, todos los dispositivos no harán nada, y el único dispositivo que responderá es
+el dispositivo C enviando una respuesta ARP.
+
+El dispositivo C va a decir YO TENGO LA 10.0.2.6. Y MI MAC ADDRESS ES 00:11:22:33:44:66
+
+
+De esta forma el dispositivo A tendrá la dirección Mac del dispositivo C y ahora podrá comunicarse con el dispositivo C y hacer cualquier tarea que quisiera hacer.
+
+Así que toda esta comunicación se facilita utilizando el protocolo ARP.
+
+Como he dicho, el protocolo ARP es un protocolo muy sencillo.
+
+Como puedes ver, todo lo que tiene son peticiones y respuestas, y todo esto es para que podamos enlazar direcciones IP a direcciones MAC o traducir direcciones IP a direcciones MAC para que un dispositivo pueda enviar la petición pidiendo una dirección mac, Y entonces el dispositivo que tiene la dirección MAC respondería con su dirección MAC.
+
+Así de sencillo.
+
+Funciona perfectamente y hace su trabajo rápidamente.
+
+Así que si quisiéramos construir un script que nos permitiera descubrir clientes en la misma red, podemos usar
+
+el protocolo ARP y enviar peticiones broadcast como la que se envía aquí, pero la enviaremos para todas las direcciones IP posibles.
+------------------------------------------
+
+Así que cada vez que enviamos este Broadcast o difusión, si hay un dispositivo que tiene esa dirección IP, nos  va a responder diciendo, TENGO ESA DIRECCION IP, Y mi dirección MAC es esta.
+De lo contrario no obtendremos respuesta y sabremos que no hay ningún cliente en esta dirección IP y probaremos
+con la siguiente dirección IP.
+
+
+Ahora.
+Ya he creado un nuevo proyecto llamado Network Scanner.
+Ya te he enseñado antes cómo crear un nuevo proyecto, así que no voy a volver a hacerlo.
+Ahora vamos a utilizar un módulo llamado SCAPY.
+Y para importar este módulo según su documentación, tenemos que hacer import como siempre y escribir el nombre
+del módulo que es SCAPY.
+Pero tenemos que añadir SCAPY.ALL 
+Ahora vamos a hacer una función y la vamos a llamar scan() porque va a escanear  y lo que vamos a hacer con esta función, es agregarle un parametro llamado ip que va a tomar una variable donde almacenaremos la dirección IP.
+
+Puede utilizar esta función como de costumbre haciendo scapy, seguido del nombre de la función, lo que se
+denomina un AR-ping quedando de la siguiente forma scapy.arping()
+
+Y todo lo que tienes que hacer es dar la IP a esta función.
+
+Y ya está.
+
+Así de sencillo.
+
+Y como dije, este es un ejemplo muy, muy simple para descubrir clientes en la misma red usando
+el protocolo ARP.
+
+Así que vamos a hacer escanear y darle la IP que queremos escanear.
+Por ejemplo:
+digamos que quiero escanear la IP de mi router.
+Si estoy en Linux lo hago con el comando route -n, o en Windows con ipconfig y buscamos PUERTA DE ENLACE PREDETERMINADA.
+
+Verás que mi puerta de enlace está a 10.0.0.1
+
+Así que esta es la IP de mi router.
+
+Así que voy a verificar que esta IP existe y como resultado debería obtener la dirección MAC porque lo que vamos a hacer es enviar un broadcast preguntando quién tiene LA 10.0.0.1 en este caso
+y el router me va a responder en este caso, dándome su dirección Mac.
+
+Así que sólo voy a ESCRIBIR EN EL PARAMETRO IP LA DIRECCION 10.0.0.1  y eso es todo.
+
+Nuestro código está hecho.
+Muy, muy sencillo.
+
+
+Recibimos un paquete, tenemos una respuesta, tenemos la dirección IP y tenemos la dirección MAC de mi ACCES POINT O DE MI ROUTER
+
+Ahora esta función de aquí, AR-Ping también toma rangos DE IP. Y a lo que me refiero con rango es una forma de especificar múltiples IPS en la misma línea.
+
+Así que si quisiera escanear todos los IPS dentro de esta subred, así que si quisiera escanear de 10.0.2.1 to 10.0.2.254, en lugar de escribir eso varias veces, puedo simplemente escribir /24.
+
+Esta es una forma común de especificar toda la subred y la red.
+
+Así que no sólo es KP, usted encontrará esto en cualquier lugar cuando usted está leyendo o en cualquier
+
+programa de red, sólo puede escribir sobre 24 para especificar el rango de 0 a 2 cinco cuatro en el último campo aquí en la IP.
+
+Así que si ejecutamos esto así, va a escanear toda la red en la que estoy y me va a devolver
+
+todos los IPS válidos con sus direcciones MAC, como se puede ver aquí.
+
+Ahora.
+
+Como se ve, no hicimos gran cosa.
+
+Todo lo que hicimos fue importar el módulo de escape y luego llamamos a una función llamada ARP Ping.
+
+Le damos la IP o el rango y lo hace todo por nosotros.
+
+Envía las emisiones, recibe las respuestas, las analiza y nos muestra el
+
+resultado en pantalla.
+
+Así que realmente no estamos haciendo mucho, pero eso está bien.
+
+Y esta conferencia, sólo quería mostrar cómo funciona ERP y cómo utilizar KP con ERP para descubrir todos los clientes
+
+en la misma red.
+
+Y en la próxima clase, vamos a profundizar y reescribir esta función de una manera más avanzada.
+
+
+
+
+
+
